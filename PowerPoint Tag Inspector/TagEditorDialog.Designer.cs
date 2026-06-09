@@ -19,7 +19,7 @@ namespace PowerPointTagInspector
         {
             _tableLayout = new System.Windows.Forms.TableLayoutPanel();
             _lblName = new System.Windows.Forms.Label();
-            _txtName = new System.Windows.Forms.TextBox();
+            _txtName = new System.Windows.Forms.ComboBox();
             _lblValue = new System.Windows.Forms.Label();
             _txtValue = new System.Windows.Forms.TextBox();
             _flowButtons = new System.Windows.Forms.FlowLayoutPanel();
@@ -59,6 +59,16 @@ namespace PowerPointTagInspector
 
             // _txtName
             _txtName.Dock = System.Windows.Forms.DockStyle.Fill;
+            _txtName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
+            _txtName.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            _txtName.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            _txtName.Items.AddRange(new object[] {
+                "RowsDataSourceName",
+                "RowsCount",
+                "DeleteIf",
+                "RowsGroupFieldName",
+                "DeleteUnusedColumns"
+            });
             _txtName.Margin = new System.Windows.Forms.Padding(3);
             _txtName.Name = "_txtName";
             _txtName.AccessibleName = "Tag Name";
@@ -122,7 +132,7 @@ namespace PowerPointTagInspector
 
         private System.Windows.Forms.TableLayoutPanel _tableLayout;
         private System.Windows.Forms.Label _lblName;
-        private System.Windows.Forms.TextBox _txtName;
+        private System.Windows.Forms.ComboBox _txtName;
         private System.Windows.Forms.Label _lblValue;
         private System.Windows.Forms.TextBox _txtValue;
         private System.Windows.Forms.FlowLayoutPanel _flowButtons;

@@ -28,7 +28,7 @@ internal partial class TagEditorDialog : Form
 
         _txtName.Text = name;
         _txtValue.Text = value;
-        _txtName.ReadOnly = true;
+        _txtName.Enabled = false;
     }
 
     /// <summary>
