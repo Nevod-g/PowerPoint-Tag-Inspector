@@ -58,6 +58,11 @@ internal sealed class TagEditorState : IDisposable
     public string? SlideName { get; private set; }
 
     /// <summary>
+    /// Gets the text content of the selected shape, or null if not in shape mode or shape has no text frame.
+    /// </summary>
+    public string? ShapeText { get; private set; }
+
+    /// <summary>
     /// Connects to the running PowerPoint instance.
     /// </summary>
     public void Connect()
@@ -94,6 +99,7 @@ internal sealed class TagEditorState : IDisposable
         TargetDescription = null;
         SlideIndex = null;
         SlideName = null;
+        ShapeText = null;
         _currentSlide = null;
         _currentShape = null;
 
@@ -121,6 +127,7 @@ internal sealed class TagEditorState : IDisposable
                     SlideName = PowerPointService.GetSlideName(_currentSlide);
                     _currentShape = _service.GetSelectedShape();
                     TargetDescription = PowerPointService.GetShapeInfo(_currentShape);
+                    ShapeText = PowerPointService.GetShapeText(_currentShape);
                     CurrentTags = _service.GetTags(_currentShape);
                     break;
             }
@@ -198,6 +205,21 @@ internal sealed class TagEditorState : IDisposable
         PowerPointService.SetSlideName(_currentSlide, newName);
         SlideName = newName;
         TargetDescription = PowerPointService.GetSlideInfo(_currentSlide);
+    }
+
+    /// <summary>
+    /// Sets the text content of the selected shape.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when no shape is selected or shape has no text frame.</exception>
+    public void SetShapeText(string text)
+    {
+        if (_currentShape is null)
+        {
+            throw new InvalidOperationException("No shape selected. Refresh and try again.");
+        }
+
+        PowerPointService.SetShapeText(_currentShape, text);
+        ShapeText = text;
     }
 
     /// <summary>

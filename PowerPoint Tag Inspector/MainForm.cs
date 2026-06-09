@@ -221,6 +221,9 @@ internal partial class MainForm : Form
         // Update slide name editor
         UpdateSlideNameEditor();
 
+        // Update shape text editor
+        UpdateShapeTextEditor();
+
         _statusLabel.Text = _state.GetStatusText();
     }
 
@@ -263,6 +266,43 @@ internal partial class MainForm : Form
         catch (InvalidOperationException ex)
         {
             ShowError("Failed to rename slide.", ex.Message);
+        }
+    }
+
+    private void UpdateShapeTextEditor()
+    {
+        bool isShapeMode = _state.CurrentMode == TagSourceMode.SelectedShape
+                           && _state.LastError is null;
+
+        if (isShapeMode)
+        {
+            _lblShapeText.Text = "Formula:";
+            _txtShapeText.Text = _state.ShapeText ?? string.Empty;
+            _txtShapeText.Enabled = _state.ShapeText is not null;
+            _btnApplyShapeText.Enabled = _state.ShapeText is not null;
+        }
+        else
+        {
+            _lblShapeText.Text = "Formula:";
+            _txtShapeText.Text = string.Empty;
+            _txtShapeText.Enabled = false;
+            _btnApplyShapeText.Enabled = false;
+        }
+    }
+
+    private void BtnApplyShapeText_Click(object? sender, EventArgs e)
+    {
+        string newText = _txtShapeText.Text;
+
+        try
+        {
+            _state.SetShapeText(newText);
+            _state.Refresh();
+            UpdateUI();
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowError("Failed to update shape text.", ex.Message);
         }
     }
 

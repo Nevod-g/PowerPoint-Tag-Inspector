@@ -26,6 +26,10 @@ namespace PowerPointTagInspector
             _lblSlideIndex = new Label();
             _txtSlideName = new TextBox();
             _btnApplySlideName = new Button();
+            _shapeTextLayout = new TableLayoutPanel();
+            _lblShapeText = new Label();
+            _txtShapeText = new TextBox();
+            _btnApplyShapeText = new Button();
             _grpTags = new GroupBox();
             _tagsLayout = new TableLayoutPanel();
             _lvTags = new ListView();
@@ -42,6 +46,7 @@ namespace PowerPointTagInspector
             _grpOptions.SuspendLayout();
             _optionsLayout.SuspendLayout();
             _slideNameLayout.SuspendLayout();
+            _shapeTextLayout.SuspendLayout();
             _grpTags.SuspendLayout();
             _tagsLayout.SuspendLayout();
             _buttonsFlow.SuspendLayout();
@@ -54,12 +59,14 @@ namespace PowerPointTagInspector
             _mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             _mainLayout.Controls.Add(_grpOptions, 0, 0);
             _mainLayout.Controls.Add(_slideNameLayout, 0, 1);
-            _mainLayout.Controls.Add(_grpTags, 0, 2);
+            _mainLayout.Controls.Add(_shapeTextLayout, 0, 2);
+            _mainLayout.Controls.Add(_grpTags, 0, 3);
             _mainLayout.Dock = DockStyle.Fill;
             _mainLayout.Location = new Point(0, 0);
             _mainLayout.Name = "_mainLayout";
             _mainLayout.Padding = new Padding(6);
-            _mainLayout.RowCount = 3;
+            _mainLayout.RowCount = 4;
+            _mainLayout.RowStyles.Add(new RowStyle());
             _mainLayout.RowStyles.Add(new RowStyle());
             _mainLayout.RowStyles.Add(new RowStyle());
             _mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
@@ -163,6 +170,53 @@ namespace PowerPointTagInspector
             _btnApplySlideName.Text = "Apply";
             _btnApplySlideName.AccessibleName = "Apply slide name";
             _btnApplySlideName.Click += BtnApplySlideName_Click;
+            // 
+            // _shapeTextLayout
+            // 
+            _shapeTextLayout.AutoSize = true;
+            _shapeTextLayout.ColumnCount = 3;
+            _shapeTextLayout.ColumnStyles.Add(new ColumnStyle());
+            _shapeTextLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            _shapeTextLayout.ColumnStyles.Add(new ColumnStyle());
+            _shapeTextLayout.Controls.Add(_lblShapeText, 0, 0);
+            _shapeTextLayout.Controls.Add(_txtShapeText, 1, 0);
+            _shapeTextLayout.Controls.Add(_btnApplyShapeText, 2, 0);
+            _shapeTextLayout.Dock = DockStyle.Fill;
+            _shapeTextLayout.Margin = new Padding(3, 0, 3, 0);
+            _shapeTextLayout.Name = "_shapeTextLayout";
+            _shapeTextLayout.RowCount = 1;
+            _shapeTextLayout.RowStyles.Add(new RowStyle());
+            _shapeTextLayout.Size = new Size(905, 30);
+            _shapeTextLayout.TabIndex = 2;
+            // 
+            // _lblShapeText
+            // 
+            _lblShapeText.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            _lblShapeText.AutoSize = true;
+            _lblShapeText.Location = new Point(3, 7);
+            _lblShapeText.Margin = new Padding(3);
+            _lblShapeText.Name = "_lblShapeText";
+            _lblShapeText.Text = "Formula:";
+            _lblShapeText.AccessibleName = "Shape text formula";
+            // 
+            // _txtShapeText
+            // 
+            _txtShapeText.Dock = DockStyle.Fill;
+            _txtShapeText.Margin = new Padding(3);
+            _txtShapeText.Name = "_txtShapeText";
+            _txtShapeText.Enabled = false;
+            _txtShapeText.AccessibleName = "Shape Text";
+            // 
+            // _btnApplyShapeText
+            // 
+            _btnApplyShapeText.Location = new Point(3, 3);
+            _btnApplyShapeText.Margin = new Padding(3);
+            _btnApplyShapeText.Name = "_btnApplyShapeText";
+            _btnApplyShapeText.Size = new Size(75, 23);
+            _btnApplyShapeText.Text = "Apply";
+            _btnApplyShapeText.Enabled = false;
+            _btnApplyShapeText.AccessibleName = "Apply shape text";
+            _btnApplyShapeText.Click += BtnApplyShapeText_Click;
             // 
             // _grpTags
             // 
@@ -308,6 +362,8 @@ namespace PowerPointTagInspector
             _optionsLayout.PerformLayout();
             _slideNameLayout.ResumeLayout(false);
             _slideNameLayout.PerformLayout();
+            _shapeTextLayout.ResumeLayout(false);
+            _shapeTextLayout.PerformLayout();
             _grpTags.ResumeLayout(false);
             _tagsLayout.ResumeLayout(false);
             _tagsLayout.PerformLayout();
@@ -329,6 +385,10 @@ namespace PowerPointTagInspector
         private System.Windows.Forms.Label _lblSlideIndex;
         private System.Windows.Forms.TextBox _txtSlideName;
         private System.Windows.Forms.Button _btnApplySlideName;
+        private System.Windows.Forms.TableLayoutPanel _shapeTextLayout;
+        private System.Windows.Forms.Label _lblShapeText;
+        private System.Windows.Forms.TextBox _txtShapeText;
+        private System.Windows.Forms.Button _btnApplyShapeText;
         private System.Windows.Forms.GroupBox _grpTags;
         private System.Windows.Forms.TableLayoutPanel _tagsLayout;
         private System.Windows.Forms.ListView _lvTags;

@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Core = Microsoft.Office.Core;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
 namespace PowerPointTagInspector.Services;
@@ -9,6 +10,10 @@ namespace PowerPointTagInspector.Services;
 /// </summary>
 internal sealed class PowerPointService : IDisposable
 {
+    private const int RpcCallRejectedMaxRetries = 5;
+    private const int RpcCallRejectedRetryDelayMs = 250;
+    private const int RPC_E_CALL_REJECTED = unchecked((int)0x80010001);
+
     private PowerPoint.Application? _application;
     private bool _disposed;
 
@@ -178,6 +183,92 @@ internal sealed class PowerPointService : IDisposable
     }
 
     /// <summary>
+    /// Gets the formula/text of a shape depending on its type:
+    /// - AutoShape, Placeholder, TextBox: reads TextFrame.TextRange.Text
+    /// - Picture: reads shape.Title (used as formula source for image shapes)
+    /// Returns null if the shape type is not supported or text cannot be read.
+    /// Retries on RPC_E_CALL_REJECTED to handle COM busy state.
+    /// </summary>
+    public static string? GetShapeText(PowerPoint.Shape shape)
+    {
+        ArgumentNullException.ThrowIfNull(shape);
+
+        if (shape.Type == Core.MsoShapeType.msoPicture)
+        {
+            string? title = null;
+
+            RetryOnRpcBusy(() =>
+            {
+                title = shape.Title?.Trim()?.Replace("\r", string.Empty);
+            });
+
+            return title;
+        }
+
+        if (shape.Type != Core.MsoShapeType.msoAutoShape
+            && shape.Type != Core.MsoShapeType.msoPlaceholder
+            && shape.Type != Core.MsoShapeType.msoTextBox)
+        {
+            return null;
+        }
+
+        string? result = null;
+
+        RetryOnRpcBusy(() =>
+        {
+            try
+            {
+                result = shape.TextFrame?.TextRange?.Text;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                result = null;
+            }
+        });
+
+        return result;
+    }
+
+    /// <summary>
+    /// Sets the formula/text of a shape depending on its type:
+    /// - AutoShape, Placeholder, TextBox: writes TextFrame.TextRange.Text
+    /// - Picture: writes shape.Title
+    /// Retries on RPC_E_CALL_REJECTED to handle COM busy state.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when the shape type is not supported or has no text frame.</exception>
+    public static void SetShapeText(PowerPoint.Shape shape, string text)
+    {
+        ArgumentNullException.ThrowIfNull(shape);
+
+        if (shape.Type == Core.MsoShapeType.msoPicture)
+        {
+            RetryOnRpcBusy(() =>
+            {
+                shape.Title = text;
+            });
+
+            return;
+        }
+
+        if (shape.Type != Core.MsoShapeType.msoAutoShape
+            && shape.Type != Core.MsoShapeType.msoPlaceholder
+            && shape.Type != Core.MsoShapeType.msoTextBox)
+        {
+            throw new InvalidOperationException("The selected shape type does not support text editing.");
+        }
+
+        if (shape.HasTextFrame != Core.MsoTriState.msoTrue)
+        {
+            throw new InvalidOperationException("The selected shape does not have a text frame.");
+        }
+
+        RetryOnRpcBusy(() =>
+        {
+            shape.TextFrame.TextRange.Text = text;
+        });
+    }
+
+    /// <summary>
     /// Reads all tags from a slide.
     /// </summary>
     public List<TagItem> GetTags(PowerPoint.Slide slide)
@@ -325,5 +416,29 @@ internal sealed class PowerPointService : IDisposable
         }
 
         return -1;
+    }
+
+    /// <summary>
+    /// Retries an action on RPC_E_CALL_REJECTED (0x80010001) which occurs when the COM server is busy.
+    /// </summary>
+    private static void RetryOnRpcBusy(Action action)
+    {
+        for (int attempt = 1; attempt <= RpcCallRejectedMaxRetries; attempt++)
+        {
+            try
+            {
+                action();
+                return;
+            }
+            catch (COMException ex) when (ex.HResult == RPC_E_CALL_REJECTED)
+            {
+                if (attempt == RpcCallRejectedMaxRetries)
+                {
+                    throw;
+                }
+
+                Thread.Sleep(RpcCallRejectedRetryDelayMs);
+            }
+        }
     }
 }
