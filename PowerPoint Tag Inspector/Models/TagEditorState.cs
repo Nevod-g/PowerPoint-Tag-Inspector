@@ -43,6 +43,21 @@ internal sealed class TagEditorState : IDisposable
     public string? LastError { get; private set; }
 
     /// <summary>
+    /// Gets a description of the current target (e.g., "#1 Slide1" or "#5 TextBox 3").
+    /// </summary>
+    public string? TargetDescription { get; private set; }
+
+    /// <summary>
+    /// Gets the current slide index, or null if no slide is loaded.
+    /// </summary>
+    public int? SlideIndex { get; private set; }
+
+    /// <summary>
+    /// Gets the current slide name, or null if no slide is loaded.
+    /// </summary>
+    public string? SlideName { get; private set; }
+
+    /// <summary>
     /// Connects to the running PowerPoint instance.
     /// </summary>
     public void Connect()
@@ -76,6 +91,9 @@ internal sealed class TagEditorState : IDisposable
     {
         LastError = null;
         CurrentTags = [];
+        TargetDescription = null;
+        SlideIndex = null;
+        SlideName = null;
         _currentSlide = null;
         _currentShape = null;
 
@@ -91,11 +109,18 @@ internal sealed class TagEditorState : IDisposable
             {
                 case TagSourceMode.ActiveSlide:
                     _currentSlide = _service.GetActiveSlide();
+                    SlideIndex = PowerPointService.GetSlideIndex(_currentSlide);
+                    SlideName = PowerPointService.GetSlideName(_currentSlide);
+                    TargetDescription = PowerPointService.GetSlideInfo(_currentSlide);
                     CurrentTags = _service.GetTags(_currentSlide);
                     break;
 
                 case TagSourceMode.SelectedShape:
+                    _currentSlide = _service.GetActiveSlide();
+                    SlideIndex = PowerPointService.GetSlideIndex(_currentSlide);
+                    SlideName = PowerPointService.GetSlideName(_currentSlide);
                     _currentShape = _service.GetSelectedShape();
+                    TargetDescription = PowerPointService.GetShapeInfo(_currentShape);
                     CurrentTags = _service.GetTags(_currentShape);
                     break;
             }
@@ -157,6 +182,22 @@ internal sealed class TagEditorState : IDisposable
             TagSourceMode.SelectedShape when _currentShape is not null => _service.TagExists(_currentShape, name),
             _ => false
         };
+    }
+
+    /// <summary>
+    /// Renames the current slide.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when no slide is available.</exception>
+    public void RenameSlideName(string newName)
+    {
+        if (_currentSlide is null)
+        {
+            throw new InvalidOperationException("No active slide available. Refresh and try again.");
+        }
+
+        PowerPointService.SetSlideName(_currentSlide, newName);
+        SlideName = newName;
+        TargetDescription = PowerPointService.GetSlideInfo(_currentSlide);
     }
 
     /// <summary>

@@ -189,9 +189,8 @@ internal partial class MainForm : Form
 
         foreach (TagItem tag in _state.CurrentTags)
         {
-            ListViewItem item = new(tag.Name);
-            item.SubItems.Add(tag.Value);
-            _lvTags.Items.Add(item);
+            if (tag.Name == "TAG") continue; // skip internal tag
+            _lvTags.Items.Add(new ListViewItem([tag.Name, tag.Value]));
         }
 
         _lvTags.EndUpdate();
@@ -216,7 +215,76 @@ internal partial class MainForm : Form
         _btnEdit.Enabled = hasTarget && _lvTags.SelectedItems.Count > 0;
         _btnDelete.Enabled = hasTarget && _lvTags.SelectedItems.Count > 0;
 
+        // Update radio button labels with current target info
+        UpdateRadioButtonLabels();
+
+        // Update slide name editor
+        UpdateSlideNameEditor();
+
         _statusLabel.Text = _state.GetStatusText();
+    }
+
+    private void UpdateSlideNameEditor()
+    {
+        if (_state.SlideIndex is not null)
+        {
+            _lblSlideIndex.Text = $"Slide #{_state.SlideIndex}";
+            _txtSlideName.Text = _state.SlideName ?? string.Empty;
+            _txtSlideName.Enabled = true;
+            _btnApplySlideName.Enabled = true;
+        }
+        else
+        {
+            _lblSlideIndex.Text = "Slide #";
+            _txtSlideName.Text = string.Empty;
+            _txtSlideName.Enabled = false;
+            _btnApplySlideName.Enabled = false;
+        }
+    }
+
+    private void BtnApplySlideName_Click(object? sender, EventArgs e)
+    {
+        string newName = _txtSlideName.Text.Trim();
+
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            MessageBox.Show(this, "Slide name cannot be empty.", "Validation Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            _txtSlideName.Focus();
+            return;
+        }
+
+        try
+        {
+            _state.RenameSlideName(newName);
+            _state.Refresh();
+            UpdateUI();
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowError("Failed to rename slide.", ex.Message);
+        }
+    }
+
+    private void UpdateRadioButtonLabels()
+    {
+        string slideLabel = "Active Slide";
+        string shapeLabel = "Selected Shape";
+
+        if (_state.IsConnected && _state.TargetDescription is not null)
+        {
+            if (_state.CurrentMode == TagSourceMode.ActiveSlide)
+            {
+                slideLabel = $"Active Slide ({_state.TargetDescription})";
+            }
+            else
+            {
+                shapeLabel = $"Selected Shape ({_state.TargetDescription})";
+            }
+        }
+
+        _rbActiveSlide.Text = slideLabel;
+        _rbSelectedShape.Text = shapeLabel;
     }
 
     private void ShowError(string title, string message)

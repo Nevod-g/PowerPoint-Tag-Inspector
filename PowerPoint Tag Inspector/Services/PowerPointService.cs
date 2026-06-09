@@ -123,6 +123,61 @@ internal sealed class PowerPointService : IDisposable
     }
 
     /// <summary>
+    /// Gets a descriptive string for a slide: "#SlideIndex SlideName".
+    /// </summary>
+    public static string GetSlideInfo(PowerPoint.Slide slide)
+    {
+        ArgumentNullException.ThrowIfNull(slide);
+
+        return $"#{slide.SlideIndex} {slide.Name}";
+    }
+
+    /// <summary>
+    /// Gets the slide index.
+    /// </summary>
+    public static int GetSlideIndex(PowerPoint.Slide slide)
+    {
+        ArgumentNullException.ThrowIfNull(slide);
+
+        return slide.SlideIndex;
+    }
+
+    /// <summary>
+    /// Gets the slide name.
+    /// </summary>
+    public static string GetSlideName(PowerPoint.Slide slide)
+    {
+        ArgumentNullException.ThrowIfNull(slide);
+
+        return slide.Name;
+    }
+
+    /// <summary>
+    /// Sets (renames) the slide name.
+    /// </summary>
+    public static void SetSlideName(PowerPoint.Slide slide, string name)
+    {
+        ArgumentNullException.ThrowIfNull(slide);
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Slide name cannot be empty.", nameof(name));
+        }
+
+        slide.Name = name;
+    }
+
+    /// <summary>
+    /// Gets a descriptive string for a shape: "#ShapeIndex ShapeName".
+    /// </summary>
+    public static string GetShapeInfo(PowerPoint.Shape shape)
+    {
+        ArgumentNullException.ThrowIfNull(shape);
+
+        return $"#{shape.Id} {shape.Name}";
+    }
+
+    /// <summary>
     /// Reads all tags from a slide.
     /// </summary>
     public List<TagItem> GetTags(PowerPoint.Slide slide)
