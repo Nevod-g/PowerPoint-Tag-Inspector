@@ -1,6 +1,7 @@
 # PowerPoint Tag Inspector
 
 A Windows desktop application for viewing and editing PowerPoint Tags on the active slide or selected shape in a running PowerPoint presentation. Also allows renaming slides directly from the inspector.
+<img width="506" height="451" alt="image" src="https://github.com/user-attachments/assets/f5f78f15-eb09-454d-bf7f-f8f59cdc2700" />
 
 ## Requirements
 
